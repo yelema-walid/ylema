@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Interface Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .erreur { color: red; }
+    </style>
+</head>
+<body><div id="loginOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000000cc;display:flex;justify-content:center;align-items:center;z-index:9999;">
+  <div style="background:white;padding:30px;border-radius:8px;box-shadow:0 0 10px #000;text-align:center;">
+    <h2>Connexion Admin</h2>
+    <p>Entrez le mot de passe pour accéder à cette page :</p>
+    <input type="password" id="adminPassword" placeholder="Mot de passe" style="padding:8px;width:80%;margin-top:10px;"><br><br>
+    <button onclick="checkPassword()" style="padding:10px 20px;">Valider</button>
+    <p id="errorMessage" style="color:red;margin-top:10px;display:none;">Mot de passe incorrect</p>
+  </div>
+</div>
+
+    <h2>Espace Administrateur</h2>
+
+    {% if not session.admin %}
+        <form method="post">
+            <label>Mot de passe admin :</label>
+            <input type="password" name="motdepasse" required>
+            <button type="submit">Connexion</button>
+        </form>
+        {% if erreur %}
+            <p class="erreur">{{ erreur }}</p>
+        {% endif %}
+    {% else %}
+        <p>Connecté en tant qu'administrateur.</p>
+        <p><strong>Tickets vendus :</strong> {{ tickets_vendus }}</p>
+        <p><strong>Tickets restants :</strong> {{ tickets_restants }}</p>
+
+        <form action="{{ url_for('telecharger_participants') }}">
+            <button type="submit" style="margin-top: 20px;">Télécharger la liste des participants</button>
+        </form>
+
+        <h3>Tirage au sort</h3>
+
+        {% if tickets_restants == 0 %}
+            <button onclick="tirerGagnant()">Tirer un gagnant</button>
+        {% else %}
+            <p style="color: red; font-weight: bold;">
+                Le tirage ne sera activé qu'une fois les {{ tickets_total }} tickets vendus.
+                (Tickets vendus : {{ tickets_vendus }} / {{ tickets_total }})
+            </p>
+        {% endif %}
+
+        <p id="resultatTirage"></p>
+
+        <table>
+            <tr><th>Réf. Ticket</th><th>Nom / Numéro</th><th>Date d'achat</th></tr>
+            {% for ticket in participants %}
+            <tr>
+                <td>TK{{ "%04d" % loop.index }}</td>
+                <td>{{ ticket[0] }}</td>
+                <td>{{ ticket[1] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <script>
+        function tirerGagnant() {
+            fetch('/tirage', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ticket) {
+                        document.getElementById('resultatTirage').innerText =
+                            "Le gagnant est : " + data.gagnant + " (Ticket n° " + data.ticket + ")";
+                    } else {
+                        document.getElementById('resultatTirage').innerText = data.gagnant;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du tirage :', error);
+                    document.getElementById('resultatTirage').innerText = "Erreur lors du tirage.";
+                });
+        }
+    </script>
+<script>
+  const motDePasse = "@dM1n_!2024$WendTondé*"; // Mot de passe sécurisé
+
+  function checkPassword() {
+    const input = document.getElementById("adminPassword").value;
+    if (input === motDePasse) {
+      document.getElementById("loginOverlay").style.display = "none";
+    } else {
+      document.getElementById("errorMessage").style.display = "block";
+    }
+  }
+</script>
+</body>
+</html>

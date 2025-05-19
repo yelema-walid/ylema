@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html><html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Tombola Yèlèma</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<body>
+    <h1 class="titre">Bienvenue à la mini tombola Yèlèma</h1>
+    <h2 class="slogan">Yèlèma- Un tirage, une surprise, un sourire</h2><div class="article">
+<button onclick="openRulesModal()" class="rules-button">Règlement du jeu</button>
+    <h3>Article du jour</h3>
+    <img src="{{ url_for('static', filename='image/article.png') }}"
+     alt="Article"
+     class="article-img"
+     style="width:100%; max-width:1000px; height:auto; display:block; margin:20px auto; border: 3px solid #ffc107; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+    <p class="nom-article">telephone Infinix HOT 40i</p>
+    <p class="caracteristiques">Caractéristiques: Android, RAM 4Go, ROM 128Go</p>
+    <div style="background-color: #fff3cd; border-left: 6px solid #ffc107; padding: 10px 15px; margin-top: 15px; border-radius: 5px;">
+        <strong>Infos (i) :</strong> Le participant dont le numéro sera tiré au sort à la fin de la tombola recevra/livrera le lot indiqué. Bonne chance à tous !
+    </div>
+    <p class="prix">Achetez votre ticket : 500 FCFA</p>
+
+    <div class="progression">
+        <p>Progression: {{ tickets_vendus }}/{{ tickets_total }} tickets vendus</p>
+        <div class="barre-outer">
+            <div class="barre-inner" style="width: {{ (tickets_vendus / tickets_total) * 100 }}%;"></div>
+        </div>
+    </div>
+
+    <form onsubmit="openPaymentModal(); return false;" class="form-achat">
+        <input type="text" name="nom" placeholder="Entrez votre nom" required>
+        <input type="text" name="telephone" placeholder="Entrez votre numéro de téléphone" required>
+        <button type="submit">Payer</button>
+    </form>
+
+    <p class="restants">Tickets restants: {{ tickets_restants }}</p>
+</div>
+
+<footer>
+    <p>Yèlèma | Tel: 70 00 00 00 | Email: contact@Yèlèma.bf</p>
+</footer>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="/admin" style="color: gray; font-size: 14px;">Accès admin</a>
+</p>
+
+<!-- Fenêtre modale Orange Money -->
+<div id="modalPaiement" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background:#fff; margin:10% auto; padding:20px; width:90%; max-width:400px; border-radius:8px;">
+        <span class="close" onclick="closeModal()" style="float:right; cursor:pointer;">&times;</span>
+        <h2>Paiement par Orange Money</h2>
+        <p>Envoyez <strong>500 FCFA</strong> au numéro <strong>+22655136116</strong></p>
+        <p>Une fois le paiement effectué, entrez le code OTP que vous recevrez.</p>
+
+        <div id="otp-section" style="margin-top: 20px;">
+            <input type="text" id="otp-input" placeholder="Entrez votre code OTP" style="width: 100%; padding: 8px;">
+            <button onclick="validerOtp()" style="margin-top: 10px; width: 100%;">Valider</button>
+        </div>
+
+        <div id="confirmation" style="display: none; margin-top: 20px;"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='otp.js') }}"></script>
+<script>
+    function openPaymentModal() {
+        document.getElementById("modalPaiement").style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("modalPaiement").style.display = "none";
+    }
+
+    function validerOtp() {
+        const otpInput = document.getElementById("otp-input").value.trim();
+
+        if (!window.listeOtps || !Array.isArray(window.listeOtps)) {
+            alert("Erreur : liste des OTP non disponible.");
+            return;
+        }
+
+        const index = window.listeOtps.indexOf(otpInput);
+        if (index === -1) {
+            alert("Code OTP invalide ou déjà utilisé.");
+            return;
+        }
+
+        window.listeOtps.splice(index, 1); // Supprimer OTP utilisé
+
+        const numeroTicket = "TCK" + Math.floor(100000 + Math.random() * 900000);
+        document.getElementById("confirmation").innerHTML = "<strong>Paiement confirmé !</strong><br>Votre numéro de ticket : <strong>" + numeroTicket + "</strong>";
+        document.getElementById("confirmation").style.display = "block";
+        document.getElementById("otp-section").style.display = "none";
+    }
+</script>
+<div id="rulesModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span onclick="closeRulesModal()" class="close">&times;</span>
+    <h2>Règlement de la mini-tombola</h2>
+
+    <h4>Article 1 : Organisation</h4>
+    <p>Ce jeu est organisé par Yèlèma et est ouvert à toute personne majeure disposant d’un numéro Orange Money valide.</p>
+
+    <h4>Article 2 : Prix du ticket</h4>
+    <p>Le ticket est vendu à un prix variable, déterminé en fonction de l’article du jour proposé. Le paiement s’effectue via Orange Money au numéro communiqué sur la plateforme.</p>
+
+    <h4>Article 3 : Attribution des tickets</h4>
+    <p>Chaque participant reçoit un numéro de ticket automatiquement après validation du paiement par code OTP. Ce numéro est unique et figure dans la base de données de la plateforme.</p>
+
+    <h4>Article 4 : Tirage au sort</h4>
+    <p>Le tirage au sort est déclenché automatiquement une fois tous les tickets vendus. Il se fait de manière aléatoire via le système de la plateforme. Un seul gagnant est désigné par tirage.</p>
+
+    <h4>Article 5 : Réclamation du lot</h4>
+    <p>Le gagnant est contacté via le numéro fourni lors du paiement. Il devra présenter un document d’identité valide et le numéro du ticket pour recevoir son lot. Aucun frais supplémentaire ne sera demandé.</p>
+
+    <h4>Article 6 : Responsabilité</h4>
+    <p>L’organisateur s’engage à la transparence du tirage. Les résultats ne peuvent faire l’objet d’aucune contestation. En cas de fraude, le participant est disqualifié.<br>
+    <strong>Nous nous engageons à livrer le gagnant partout au Burkina Faso.</strong></p>
+
+    <h4>Article 7 : Données personnelles</h4>
+    <p>Les données collectées (nom, numéro, etc.) sont utilisées uniquement pour le bon déroulement du jeu. Elles ne sont ni vendues ni cédées à des tiers.</p>
+  </div>
+</div>
+<script>
+  function openRulesModal() {
+    document.getElementById("rulesModal").style.display = "flex";
+  }
+
+  function closeRulesModal() {
+    document.getElementById("rulesModal").style.display = "none";
+  }
+</script>
+</body>
+</html>
+</body>
+</html>

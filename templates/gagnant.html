@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gagnant de la Tombola</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1 class="titre">Félicitations !</h1>
+    <h2 class="slogan">Le gagnant de la tombola Wend Tôndé est :</h2>
+
+    <div class="gagnant-info">
+        <p><strong>Nom :</strong> {{ nom }}</p>
+        <p><strong>Numéro de ticket :</strong> {{ ticket }}</p>
+    </div>
+
+    <a href="/" style="display: block; margin-top: 20px;">Retour à l'accueil</a>
+</body>
+</html>
