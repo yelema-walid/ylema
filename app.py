@@ -6,6 +6,9 @@ import random
 from io import StringIO
 
 app = Flask(__name__)
+@app.route('/')
+def home():
+    return 'Bienvenue sur la plateforme Ylema !'
 app.secret_key = 'motdepasse-secret-wend'
 
 TICKETS_FILE = 'tickets.csv'
